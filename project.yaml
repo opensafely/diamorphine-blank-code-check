@@ -11,5 +11,5 @@ actions:
         --output output/medication_counts.csv
         --dummy-data-file analysis/medication_counts.dummy.csv
     outputs:
-      highly_sensitive:
+      moderately_sensitive:
         medication_counts: output/medication_counts.csv
