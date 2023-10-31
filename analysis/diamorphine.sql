@@ -5,7 +5,7 @@
     as
     (
         SELECT
-            MultilexDrug_ID,
+            d.MultilexDrug_ID,
             d.dmd_id,
             d.FullName,
             year(i.ConsultationDate) as [year],
