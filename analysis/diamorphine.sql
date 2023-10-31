@@ -5,28 +5,40 @@
     as
     (
         SELECT
-            dmd_id,
-            year(ConsultationDate) as [year],
-            month(ConsultationDate) as [month],
+            MultilexDrug_ID,
+            d.dmd_id,
+            d.FullName,
+            year(i.ConsultationDate) as [year],
+            month(i.ConsultationDate) as [month],
             cast(count(*) as float) as IssueCount
         FROM MedicationIssue i
             JOIN MedicationDictionary d
             on i.MultilexDrug_ID = d.MultilexDrug_ID
         WHERE 
-            lower(d.FullName) like '%diamorph%' or
+            (lower(d.FullName) like '%diamorph%' or
             lower(d.RootName) like '%diamorph%' or
             lower(d.FullName) like '%ayendi%' or
-            lower(d.rootname) like '%ayendi'
+            lower(d.rootname) like '%ayendi')
+            AND ISNUMERIC(d.dmd_id) = 0
+            AND NOT EXISTS (
+                SELECT 1 
+                FROM OpenCoronaTempTables..CustomMedicationDictionary c 
+                WHERE c.MultilexDrug_ID = d.MultilexDrug_ID
+            )
         GROUP BY
-            dmd_id,
-            year(ConsultationDate),
-            month(ConsultationDate)
+            d.MultilexDrug_ID,
+            d.dmd_id,
+            d.FullName,
+            year(i.ConsultationDate),
+            month(i.ConsultationDate)
     )
 
 select
+    MultilexDrug_ID,
     dmd_id,
+    FullName,
     [Year],
     [Month],
-    CASE WHEN IssueCount=0 THEN 0 ELSE (CEILING(IssueCount/6)*6) - 3 END as IssueCount_midpoint6
+    cast(CASE WHEN IssueCount=0 THEN 0 ELSE (CEILING(IssueCount/6)*6) - 3 END as int) as IssueCount_midpoint6
 from cte
-order by 1,2,3
+order by 1,2,3,4,5
