@@ -9,7 +9,7 @@
             d.dmd_id,
             d.FullName,
             year(i.ConsultationDate) as [year],
-            month(i.ConsultationDate) as [month],
+            datepart(q,i.ConsultationDate) as [quarter],
             cast(count(*) as float) as IssueCount
         FROM MedicationIssue i
             JOIN MedicationDictionary d
@@ -25,12 +25,13 @@
                 FROM OpenCoronaTempTables..CustomMedicationDictionary c 
                 WHERE c.MultilexDrug_ID = d.MultilexDrug_ID
             )
+            AND year(i.ConsultationDate)>=2018
         GROUP BY
             d.MultilexDrug_ID,
             d.dmd_id,
             d.FullName,
             year(i.ConsultationDate),
-            month(i.ConsultationDate)
+            datepart(q,i.ConsultationDate)
     )
 
 select
@@ -38,7 +39,7 @@ select
     dmd_id,
     FullName,
     [Year],
-    [Month],
+    [Quarter],
     cast(CASE WHEN IssueCount=0 THEN 0 ELSE (CEILING(IssueCount/6)*6) - 3 END as int) as IssueCount_midpoint6
 from cte
 order by 1,2,3,4,5
